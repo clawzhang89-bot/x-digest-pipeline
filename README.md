@@ -114,10 +114,14 @@ python3 fetch_incremental.py ./watchlist.json ./state.json ./data/latest_increme
 
 - `EDITORIAL_GUIDE.md`：成文原则与记者式整理要求（已纳入时间线、人名称谓、轻问候语/收束语规范）
 - `SERIES_POLICY.md`：跨日联动、主题去重、系列文章策略
+- `RESEARCH_GUIDE.md`：主稿调研优先级与 research enrichment 设计
+- `research_enrichment.py`：为主稿生成更像编辑前处理的 research brief（seed 主题、核心论点、关键 claims、内容薄弱点、适合发给 Perplexity 的 research questions）
+- `research_collect.py`：把 research brief 整理成可直接交给 Perplexity 的 research pack prompt，并为后续落盘 research 结果预留结构
+- `topic_normalize.py`：把 topic/entity 抽取结果归一化，提升 research 质量
 - `topic_planner.py`：根据新增材料和最近文章，生成主题规划（新主题 / follow-up）
 - `publish_gate.py`：发布阈值判断（发布 / 跳过），避免重复出文
 - `article_index.schema.json`：文章索引元数据结构
-- `write_editorial_digest.py`：生成“记者式成文”的写作请求包
+- `write_editorial_digest.py`：生成“记者式成文”的写作请求包；支持 `--all-plans`，可在 topic 被 gate 为 skip 时依然手动生成 request 做调试/重写
 - `generate_digest.py`：把增量抓取结果整理成 Markdown 文章，并写入索引 README + JSON 索引
 - `run_digest_pipeline.py`：统一入口脚本，串起抓取、规划、发布判断、写作请求和文章输出
 
@@ -129,6 +133,8 @@ python3 fetch_incremental.py ./watchlist.json ./state.json ./data/latest_increme
 - `editorial_requests/*.json`
 - `reports/YYYY-MM-DD.md`
 - `reports/latest.md`
+- `data/research_enrichment.json`
+- `data/research_materials.json`
 
 ## 统一运行
 
@@ -139,6 +145,14 @@ cd /Users/admin/.openclaw/workspace/x-digest
 python3 run_digest_pipeline.py
 ```
 
+这条流水线现在默认也会跑 research 层：
+- `research_enrichment.py`
+- `research_collect.py`
+
+也就是说，完整链路已经变成：
+
+`incremental fetch -> topic plan -> publish gate -> editorial request -> research enrichment -> Perplexity Search + Sonar -> evidence pack -> final writing inputs`
+
 可选参数：
 
 ```bash
@@ -147,6 +161,7 @@ python3 run_digest_pipeline.py --skip-fetch
 python3 run_digest_pipeline.py --skip-plan
 python3 run_digest_pipeline.py --skip-gate
 python3 run_digest_pipeline.py --skip-request
+python3 run_digest_pipeline.py --skip-research
 python3 run_digest_pipeline.py --skip-generate
 python3 run_digest_pipeline.py --report-only
 ```
@@ -159,6 +174,67 @@ python3 run_digest_pipeline.py --report-only
 - 今天有哪些主题候选
 - 每个候选是 publish 还是 skip
 - skip 的原因是什么
+
+## 新增：Research / evidence pack 用法
+
+### 1) 只跑 research enrichment + evidence pack
+
+```bash
+cd /Users/admin/.openclaw/workspace/x-digest
+python3 research_enrichment.py
+python3 research_collect.py
+```
+
+会生成：
+
+- `data/research_enrichment.json`
+- `data/research_materials.json`
+
+其中：
+
+- `research_enrichment.json` 包含
+  - topic title
+  - core claim
+  - key claims
+  - content gaps
+  - research questions
+- `research_materials.json` 包含
+  - `perplexity.results`（Search API raw retrieval）
+  - `perplexity.sonar`（Sonar 结构化研究返回）
+  - `evidence_pack`（归一化后的 timeline / evidence_for / evidence_against / landscape / open_questions）
+
+### 2) 生成带 research pack 的写作请求
+
+如果 topic 被 publish gate 判定为 `skip`，但你还是想生成可写作的 request 做调试或人工重写：
+
+```bash
+cd /Users/admin/.openclaw/workspace/x-digest
+python3 write_editorial_digest.py --all-plans
+```
+
+生成的 `editorial_requests/*.json` 会直接包含：
+
+- `research_material`
+- prompt 中的 `research pack`
+- prompt 中的 `evidence_pack`
+
+### 3) Perplexity 配置
+
+当前 research 层支持：
+
+- Perplexity Search API
+- Perplexity Sonar
+
+默认从下面任一位置读取 key：
+
+- 环境变量：`PPLX_API_KEY`
+- 本地文件：`/Users/admin/.openclaw/workspace/x-digest/.env.perplexity`
+
+格式：
+
+```bash
+PPLX_API_KEY=your_key_here
+```
 
 ## 下一步
 

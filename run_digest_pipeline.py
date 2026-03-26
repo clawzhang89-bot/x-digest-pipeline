@@ -11,6 +11,8 @@ STATE_DEFAULT = ROOT / "state.json"
 INCREMENTAL_DEFAULT = ROOT / "data" / "latest_incremental.json"
 PLAN_DEFAULT = ROOT / "data" / "topic_plan.json"
 DECISIONS_DEFAULT = ROOT / "data" / "publish_decisions.json"
+RESEARCH_ENRICHMENT_DEFAULT = ROOT / "data" / "research_enrichment.json"
+RESEARCH_MATERIALS_DEFAULT = ROOT / "data" / "research_materials.json"
 REPORTS_DIR = ROOT / "reports"
 
 
@@ -96,6 +98,7 @@ def main() -> None:
     parser.add_argument("--skip-plan", action="store_true", help="Skip topic planning")
     parser.add_argument("--skip-gate", action="store_true", help="Skip publish gate")
     parser.add_argument("--skip-request", action="store_true", help="Skip editorial request generation")
+    parser.add_argument("--skip-research", action="store_true", help="Skip research enrichment + collection")
     parser.add_argument("--skip-generate", action="store_true", help="Skip markdown article generation")
     parser.add_argument("--report-only", action="store_true", help="Run planning + gate only, then print report and stop")
     args = parser.parse_args()
@@ -126,6 +129,10 @@ def main() -> None:
     if not args.skip_request:
         run([sys.executable, "write_editorial_digest.py"], cwd=ROOT)
 
+    if not args.skip_research:
+        run([sys.executable, "research_enrichment.py"], cwd=ROOT)
+        run([sys.executable, "research_collect.py"], cwd=ROOT)
+
     if not args.skip_generate:
         run([sys.executable, "generate_digest.py"], cwd=ROOT)
 
@@ -137,6 +144,8 @@ def main() -> None:
     print(f"- Topic plan: {PLAN_DEFAULT}")
     print(f"- Publish decisions: {ROOT / 'data' / 'publish_decisions.json'}")
     print(f"- Editorial requests: {ROOT / 'editorial_requests'}")
+    print(f"- Research enrichment: {RESEARCH_ENRICHMENT_DEFAULT}")
+    print(f"- Research materials: {RESEARCH_MATERIALS_DEFAULT}")
     print(f"- Articles index: {ROOT / 'articles' / 'README.md'}")
     print(f"- Articles metadata: {ROOT / 'articles' / 'index.json'}")
 
