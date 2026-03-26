@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# Local state / generated data
+state.json
+state.seed.json
+data/
+editorial_requests/
+reports/latest.md
+
+# macOS
+.DS_Store

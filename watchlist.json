@@ -1,0 +1,32 @@
+{
+  "groups": {
+    "ai_llm": [
+      "saranormous",
+      "_LuoFuli"
+    ],
+    "embodied_vla_world_model": [],
+    "agents_automation": [
+      "steipete"
+    ]
+  },
+  "tagsByAccount": {
+    "saranormous": [
+      "ai_llm",
+      "agents_automation"
+    ],
+    "_LuoFuli": [
+      "ai_llm"
+    ],
+    "steipete": [
+      "agents_automation"
+    ]
+  },
+  "notes": {
+    "description": "正式关注列表。后续优先维护这个文件。允许同一账号出现在多个分组。",
+    "rules": [
+      "账号名可带@也可不带@",
+      "允许重复归类",
+      "groups 和 tagsByAccount 可以并存，程序会自动合并"
+    ]
+  }
+}

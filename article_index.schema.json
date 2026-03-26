@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "x-digest article index",
+  "type": "object",
+  "properties": {
+    "articles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "date": { "type": "string" },
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "entities": { "type": "array", "items": { "type": "string" } },
+          "group": { "type": "string" },
+          "series_id": { "type": ["string", "null"] },
+          "series_title": { "type": ["string", "null"] },
+          "is_followup": { "type": "boolean" },
+          "followup_to": { "type": ["string", "null"] },
+          "source_accounts": { "type": "array", "items": { "type": "string" } },
+          "source_post_ids": { "type": "array", "items": { "type": "string" } },
+          "path": { "type": "string" }
+        },
+        "required": [
+          "id",
+          "date",
+          "title",
+          "summary",
+          "tags",
+          "entities",
+          "group",
+          "series_id",
+          "series_title",
+          "is_followup",
+          "followup_to",
+          "source_accounts",
+          "source_post_ids",
+          "path"
+        ]
+      }
+    }
+  },
+  "required": ["articles"]
+}
